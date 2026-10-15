@@ -1,0 +1,30 @@
+package com.bank.authservice.controller;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.bank.authservice.service.AuditService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/auth")
+public class LoginController {
+
+	private final AuditService auditService;
+	
+	@PostMapping("/login-success")
+	public void loginSuccess(@RequestParam String userName, HttpServletRequest servletRequest) {
+		auditService.logSuccess(userName, servletRequest.getRemoteAddr());
+	}
+	
+	@PostMapping("/login-failure")
+	public void loginFailure(@RequestParam String userName, @RequestParam String reason,
+			HttpServletRequest servletRequest) {
+		auditService.logFailure(userName, servletRequest.getRemoteAddr(), reason);
+	}
+}

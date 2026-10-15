@@ -1,0 +1,37 @@
+package com.bank.authservice.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.web.SecurityFilterChain;
+
+import com.bank.authservice.security.OtpAuthenticationConvertor;
+import com.bank.authservice.security.OtpAuthenticationProvider;
+
+@Configuration
+public class AuthorizationServerConfig {
+
+	@Bean
+	@Order(-1)
+	SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http, 
+			OtpAuthenticationConvertor convertor, OtpAuthenticationProvider provider) throws Exception{
+		
+		OAuth2AuthorizationServerConfigurer serverConfigurer = new OAuth2AuthorizationServerConfigurer();		
+		http.securityMatcher(serverConfigurer.getEndpointsMatcher()).with(serverConfigurer,
+				auth -> auth.tokenEndpoint(tkp -> tkp.accessTokenRequestConverter(convertor).
+						authenticationProvider(provider))).csrf(csrf-> csrf.disable());
+		return http.build();
+	}
+	
+	 @Bean
+	    public AuthorizationServerSettings authorizationServerSettings() {
+	        return AuthorizationServerSettings.builder()
+	            .issuer("http://localhost:9000")
+	            .build();
+	    }
+}
